@@ -1,64 +1,111 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+Documentación de la API
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Para realizar las pruebas de la API por Postman, utilizaremos las siguientes rutas:
 
-## About Laravel
+1. Autenticación
+    POST   http://127.0.0.1:8000/api/login
+    Descripción: Autentica a un usuario y devuelve un token.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+    Solicitud:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+    {
+        "email": "usuario@example.com",
+        "password": "tucontraseña"
+    }
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+    Respuesta: 
 
-## Learning Laravel
+    {
+        "token": "21|60ZjkPsLwODOMei5orp79A9UCycvC0JfMzvogO7R",
+        "user": {
+            "id": 1,
+            "codigo_trabajador": "001",
+            "name": "Usuario Uno",
+            "email": "encargado@gmail.com",
+            "telefono": "1234567890",
+            "puesto": "-",
+            "rol": "Encargado",
+            "email_verified_at": "2024-09-05 06:13:01",
+            "remember_token": null,
+            "current_team_id": null,
+            "profile_photo_path": null,
+            "created_at": "2024-09-05T06:13:01.000000Z",
+            "updated_at": "2024-09-05T06:13:01.000000Z"
+        }
+    }
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+    Con el Token generado se podra realizar las siguientes peticiones.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-## Laravel Sponsors
+2. Pedidos
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+    * GET http://127.0.0.1:8000/api/pedidos
+        Descripción: Lista los pedidos.
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+    * POST http://127.0.0.1:8000/api/pedidos
+        Descripción: Registra un nuevo pedido.
 
-## Contributing
+        Solicitud:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+        {
+            "numero_pedido": "P001",
+            "fecha_pedido": "2024-09-01",
+            "fecha_recepcion": "2024-09-02",
+            "fecha_despacho": "2024-09-03",
+            "fecha_entrega": "2024-09-04",
+            "vendedor_id": 1,
+            "repartidor_id": 2,
+            "estado": "por_atender",
+            "detalles": [
+                {
+                    "producto_id": 1,
+                    "cantidad": 10,
+                    "precio_unitario": 15.50
+                },
+                {
+                    "producto_id": 2,
+                    "cantidad": 5,
+                    "precio_unitario": 25.00
+                }
+            ]
+        }
 
-## Code of Conduct
+    *  PUT  http://127.0.0.1:8000/api/pedidos/3/por-atender
+        Descripción: Actualiza el estado del pedido a "por_atender".
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+        Solicitud:
 
-## Security Vulnerabilities
+        {
+            "fecha_pedido": "2024-09-01"
+        }
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    *  PUT  http://127.0.0.1:8000/api/pedidos/3/en-proceso
+        Descripción: Actualiza el estado del pedido a "en_proceso".
 
-## License
+        Solicitud:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+        {
+            "fecha_recepcion": "2024-09-01"
+        }
+
+    *  PUT  http://127.0.0.1:8000/api/pedidos/3/en-delivery
+        Descripción: Actualiza el estado del pedido a "en_delivery".
+
+        Solicitud:
+
+        {
+            "fecha_despacho": "2024-09-01"
+        }
+
+    *  PUT  http://127.0.0.1:8000/api/pedidos/3/recibido
+        Descripción: Actualiza el estado del pedido a "recibido".
+
+        Solicitud:
+
+        {
+            "fecha_entrega": "2024-09-01"
+        }
+
+
+

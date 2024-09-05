@@ -27,12 +27,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/pedidos', [PedidoController::class, 'listarPedidos']);
     Route::post('/pedidos', [PedidoController::class, 'registrarPedido']);
-    Route::put('/pedidos/{id}', [PedidoController::class, 'actualizarPedido']);
+    Route::put('/pedidos/{id}/por-atender', [PedidoController::class, 'EstadoPorAtender']);
+    Route::put('/pedidos/{id}/en-proceso', [PedidoController::class, 'EstadoEnProceso']);
+    Route::put('/pedidos/{id}/en-delivery', [PedidoController::class, 'EstadoEnDelivery']);
+    Route::put('/pedidos/{id}/recibido', [PedidoController::class, 'EstadoRecibido']);
 
-    Route::put('/pedidos/{id}/por-atender', [PedidoController::class, 'changeToPorAtender']);
-    Route::put('/pedidos/{id}/en-proceso', [PedidoController::class, 'changeToEnProceso']);
-    Route::put('/pedidos/{id}/en-delivery', [PedidoController::class, 'changeToEnDelivery']);
-    Route::put('/pedidos/{id}/recibido', [PedidoController::class, 'changeToRecibido']);
+    Route::get('/pedidos/filtrar', [PedidoController::class, 'filtrarPedidosPorNumero']);
+
 });
 
 Route::middleware('auth:sanctum')->get('/profile', [UserProfileController::class, 'show']);

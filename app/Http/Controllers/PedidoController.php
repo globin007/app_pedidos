@@ -29,6 +29,34 @@ class PedidoController extends Controller
         }
     }
 
+    public function filtrarPedidosPorNumero(Request $request)
+    {
+        try {
+            // Obtenemos el número de pedido del parámetro de búsqueda
+            $numeroPedido = $request->query('numero_pedido');
+
+            // Realizamos la consulta con el filtro si se proporciona un número de pedido
+            $query = Pedido::with(['detalles', 'vendedor', 'repartidor']);
+
+            if ($numeroPedido) {
+                $query->where('numero_pedido', $numeroPedido);
+            }
+
+            $pedidos = $query->get();
+
+            return response()->json([
+                'message' => 'Pedido listado correctamente',
+                'data' => $pedidos
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al listar el pedido',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
     public function registrarPedido(Request $request)
     {
         // Validamos los datos de entrada
@@ -110,93 +138,6 @@ class PedidoController extends Controller
         }
     }
 
-    public function actualizarPedido(Request $request, $id)
-    {
-        // Validamos los datos de entrada
-        $validator = Validator::make($request->all(), [
-            'numero_pedido' => 'required|string|max:255|unique:pedidos,numero_pedido,' . $id,
-            'fecha_pedido' => 'required|date',
-            'fecha_recepcion' => 'nullable|date',
-            'fecha_despacho' => 'nullable|date',
-            'fecha_entrega' => 'nullable|date',
-            'vendedor_id' => 'required|exists:users,id',
-            'repartidor_id' => 'required|exists:users,id',
-            'estado' => 'required|in:por_atender,en_proceso,en_delivery,recibido',
-            'detalles' => 'required|array',
-            'detalles.*.producto_id' => 'required|exists:productos,id',
-            'detalles.*.cantidad' => 'required|integer|min:1',
-            'detalles.*.precio_unitario' => 'required|numeric|min:0',
-        ]);
-
-        // Si la validación falla, devuelve un error
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        // Usar transacciones para asegurar la consistencia de los datos
-        DB::beginTransaction();
-
-        try {
-            // Encontrar el pedido existente
-            $pedido = Pedido::findOrFail($id);
-
-            // Actualizar el pedido
-            $pedido->update([
-                'numero_pedido' => $request->numero_pedido,
-                'fecha_pedido' => $request->fecha_pedido,
-                'fecha_recepcion' => $request->fecha_recepcion,
-                'fecha_despacho' => $request->fecha_despacho,
-                'fecha_entrega' => $request->fecha_entrega,
-                'vendedor_id' => $request->vendedor_id,
-                'repartidor_id' => $request->repartidor_id,
-                'estado' => $request->estado,
-            ]);
-
-            // Eliminar detalles antiguos
-            DetallePedido::where('pedido_id', $id)->delete();
-
-            // Crear los nuevos detalles del pedido
-            foreach ($request->detalles as $detalle) {
-                DetallePedido::create([
-                    'pedido_id' => $pedido->id,
-                    'producto_id' => $detalle['producto_id'],
-                    'cantidad' => $detalle['cantidad'],
-                    'precio_unitario' => $detalle['precio_unitario'],
-                ]);
-            }
-
-            // Confirmar la transacción
-            DB::commit();
-
-            // Devolver la respuesta JSON exitosa
-            return response()->json([
-                'message' => 'Pedido y detalles actualizados con éxito',
-                'pedido' => [
-                    'id' => $pedido->id,
-                    'numero_pedido' => $pedido->numero_pedido,
-                    'fecha_pedido' => $pedido->fecha_pedido,
-                    'fecha_recepcion' => $pedido->fecha_recepcion,
-                    'fecha_despacho' => $pedido->fecha_despacho,
-                    'fecha_entrega' => $pedido->fecha_entrega,
-                    'vendedor_id' => $pedido->vendedor_id,
-                    'repartidor_id' => $pedido->repartidor_id,
-                    'estado' => $pedido->estado,
-                    'detalles' => $request->detalles // Devuelve los detalles tal como se recibieron
-                ]
-            ], 200);
-        } catch (\Exception $e) {
-            // Deshacer la transacción si hay algún error
-            DB::rollBack();
-
-            // Devolver una respuesta de error
-            return response()->json([
-                'message' => 'Error al actualizar el pedido',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-
     // Definimos la jerarquía de estados como una propiedad de la clase
     private $estadoJerarquia = [
         'por_atender' => 1,
@@ -205,7 +146,7 @@ class PedidoController extends Controller
         'recibido' => 4,
     ];
 
-    public function changeToPorAtender(Request $request, $id)
+    public function EstadoPorAtender(Request $request, $id)
     {
         $pedido = Pedido::findOrFail($id);
 
@@ -231,7 +172,7 @@ class PedidoController extends Controller
         return response()->json(['message' => 'El pedido ha sido actualizado a por_atender.', 'pedido' => $pedido], 200);
     }
 
-    public function changeToEnProceso(Request $request, $id)
+    public function EstadoEnProceso(Request $request, $id)
     {
         $pedido = Pedido::findOrFail($id);
 
@@ -256,7 +197,7 @@ class PedidoController extends Controller
         return response()->json(['message' => 'El pedido ha sido actualizado a en_proceso.', 'pedido' => $pedido], 200);
     }
 
-    public function changeToEnDelivery(Request $request, $id)
+    public function EstadoEnDelivery(Request $request, $id)
     {
         $pedido = Pedido::findOrFail($id);
 
@@ -281,7 +222,7 @@ class PedidoController extends Controller
         return response()->json(['message' => 'El pedido ha sido actualizado a en_delivery.', 'pedido' => $pedido], 200);
     }
 
-    public function changeToRecibido(Request $request, $id)
+    public function EstadoRecibido(Request $request, $id)
     {
         $pedido = Pedido::findOrFail($id);
 
