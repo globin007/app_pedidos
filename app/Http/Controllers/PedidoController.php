@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
-
 class PedidoController extends Controller
 {
 
@@ -30,38 +29,7 @@ class PedidoController extends Controller
         }
     }
 
-
-    public function registrarPedido2(Request $request)
-    {
-        // Validar los datos
-        $request->validate([
-            'numero_pedido' => 'required|unique:pedidos,numero_pedido',
-            'fecha_pedido' => 'required|date',
-            'vendedor_id' => 'required|exists:users,id',
-            'repartidor_id' => 'required|exists:users,id',
-            'estado' => 'required|in:por_atender,en_proceso,en_delivery,recibido',
-        ]);
-
-        try {
-            // Crear el pedido
-            $pedido = Pedido::create([
-                'numero_pedido' => $request->numero_pedido,
-                'fecha_pedido' => $request->fecha_pedido,
-                'fecha_recepcion' => $request->fecha_recepcion,
-                'fecha_despacho' => $request->fecha_despacho,
-                'fecha_entrega' => $request->fecha_entrega,
-                'vendedor_id' => $request->vendedor_id,
-                'repartidor_id' => $request->repartidor_id,
-                'estado' => $request->estado,
-            ]);
-
-            return response()->json(['message' => 'Pedido registrado correctamente', 'pedido' => $pedido], 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al registrar el pedido', 'details' => $e->getMessage()], 500);
-        }
-    }
-
-    public function store(Request $request)
+    public function registrarPedido(Request $request)
     {
         // Validación de los datos de entrada
         $validator = Validator::make($request->all(), [
@@ -150,6 +118,7 @@ class PedidoController extends Controller
         'recibido' => 4,
     ];
 
+
     public function changeToPorAtender(Request $request, $id)
     {
         $pedido = Pedido::findOrFail($id);
@@ -159,10 +128,14 @@ class PedidoController extends Controller
             return response()->json(['error' => 'No se puede cambiar a por_atender desde un estado superior.'], 422);
         }
 
-        // Validar la fecha de pedido
-        $request->validate([
+        // Validar la fecha de pedido usando Validator
+        $validator = Validator::make($request->all(), [
             'fecha_pedido' => 'required|date',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         // Actualizar el estado y la fecha
         $pedido->estado = 'por_atender';
@@ -181,9 +154,14 @@ class PedidoController extends Controller
             return response()->json(['error' => 'No se puede cambiar a en_proceso desde el estado actual.'], 422);
         }
 
-        $request->validate([
+        // Validar la fecha de recepción usando Validator
+        $validator = Validator::make($request->all(), [
             'fecha_recepcion' => 'required|date',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         $pedido->estado = 'en_proceso';
         $pedido->fecha_recepcion = $request->fecha_recepcion;
@@ -201,9 +179,14 @@ class PedidoController extends Controller
             return response()->json(['error' => 'No se puede cambiar a en_delivery desde el estado actual.'], 422);
         }
 
-        $request->validate([
+        // Validar la fecha de despacho usando Validator
+        $validator = Validator::make($request->all(), [
             'fecha_despacho' => 'required|date',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         $pedido->estado = 'en_delivery';
         $pedido->fecha_despacho = $request->fecha_despacho;
@@ -221,9 +204,14 @@ class PedidoController extends Controller
             return response()->json(['error' => 'No se puede cambiar a recibido desde el estado actual.'], 422);
         }
 
-        $request->validate([
+        // Validar la fecha de entrega usando Validator
+        $validator = Validator::make($request->all(), [
             'fecha_entrega' => 'required|date',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         $pedido->estado = 'recibido';
         $pedido->fecha_entrega = $request->fecha_entrega;
