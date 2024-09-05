@@ -9,14 +9,14 @@ Para realizar las pruebas de la API por Postman, utilizaremos las siguientes rut
     Solicitud:
 
     {
-        "email": "usuario@example.com",
-        "password": "tucontraseña"
+        "email": "encargado@gmail.com",
+        "password": "encargado"
     }
 
     Respuesta: 
 
     {
-        "token": "21|60ZjkPsLwODOMei5orp79A9UCycvC0JfMzvogO7R",
+        "token": "1|60ZjkPsLwODOMei5orp79A9UCycvC0JfMzvogO7R",
         "user": {
             "id": 1,
             "codigo_trabajador": "001",
@@ -34,7 +34,7 @@ Para realizar las pruebas de la API por Postman, utilizaremos las siguientes rut
         }
     }
 
-    Con el Token generado se podra realizar las siguientes peticiones.
+    Con el token generado se podra realizar las siguientes peticiones.
 
 
 2. Pedidos
