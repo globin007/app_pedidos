@@ -21,13 +21,13 @@ use App\Http\Controllers\PedidoController;
 
 use App\Http\Controllers\UserProfileController;
 
-Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {    
 
     Route::get('/pedidos', [PedidoController::class, 'listarPedidos']);
     Route::post('/pedidos', [PedidoController::class, 'registrarPedido']);
+    Route::put('/pedidos/{id}', [PedidoController::class, 'actualizarPedido']);
 
     Route::put('/pedidos/{id}/por-atender', [PedidoController::class, 'changeToPorAtender']);
     Route::put('/pedidos/{id}/en-proceso', [PedidoController::class, 'changeToEnProceso']);
