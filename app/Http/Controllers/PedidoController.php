@@ -14,7 +14,7 @@ class PedidoController extends Controller
     public function listarPedidos()
     {
         try {
-            // Obtener todos los pedidos con sus detalles y las relaciones de vendedor y repartidor
+            // Obtenemos todos los pedidos con sus detalles y las relaciones de vendedor y repartidor
             $pedidos = Pedido::with(['detalles', 'vendedor', 'repartidor'])->get();
 
             return response()->json([
@@ -31,7 +31,7 @@ class PedidoController extends Controller
 
     public function registrarPedido(Request $request)
     {
-        // Validación de los datos de entrada
+        // Validamos los datos de entrada
         $validator = Validator::make($request->all(), [
             'numero_pedido' => 'required|string|unique:pedidos,numero_pedido|max:255',
             'fecha_pedido' => 'required|date',
@@ -110,7 +110,7 @@ class PedidoController extends Controller
         }
     }
 
-    // Definir la jerarquía de estados como una propiedad de la clase
+    // Definimos la jerarquía de estados como una propiedad de la clase
     private $estadoJerarquia = [
         'por_atender' => 1,
         'en_proceso' => 2,
@@ -118,17 +118,16 @@ class PedidoController extends Controller
         'recibido' => 4,
     ];
 
-
     public function changeToPorAtender(Request $request, $id)
     {
         $pedido = Pedido::findOrFail($id);
 
-        // Validar que el nuevo estado no sea inferior al estado actual
+        // Valida que el nuevo estado no sea inferior al estado actual
         if ($this->estadoJerarquia[$pedido->estado] > $this->estadoJerarquia['por_atender']) {
             return response()->json(['error' => 'No se puede cambiar a por_atender desde un estado superior.'], 422);
         }
 
-        // Validar la fecha de pedido usando Validator
+        // Valida la fecha de pedido 
         $validator = Validator::make($request->all(), [
             'fecha_pedido' => 'required|date',
         ]);
@@ -137,7 +136,7 @@ class PedidoController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Actualizar el estado y la fecha
+        // Actualiza el estado y la fecha
         $pedido->estado = 'por_atender';
         $pedido->fecha_pedido = $request->fecha_pedido;
         $pedido->save();
@@ -149,12 +148,12 @@ class PedidoController extends Controller
     {
         $pedido = Pedido::findOrFail($id);
 
-        // Validar que el estado actual no sea superior
+        // Valida que el estado actual no sea superior
         if ($this->estadoJerarquia[$pedido->estado] > $this->estadoJerarquia['en_proceso']) {
             return response()->json(['error' => 'No se puede cambiar a en_proceso desde el estado actual.'], 422);
         }
 
-        // Validar la fecha de recepción usando Validator
+        // Valida la fecha de recepción 
         $validator = Validator::make($request->all(), [
             'fecha_recepcion' => 'required|date',
         ]);
@@ -174,12 +173,12 @@ class PedidoController extends Controller
     {
         $pedido = Pedido::findOrFail($id);
 
-        // Validar que el estado actual no sea superior
+        // Valida que el estado actual no sea superior
         if ($this->estadoJerarquia[$pedido->estado] > $this->estadoJerarquia['en_delivery']) {
             return response()->json(['error' => 'No se puede cambiar a en_delivery desde el estado actual.'], 422);
         }
 
-        // Validar la fecha de despacho usando Validator
+        // Valida la fecha de despacho
         $validator = Validator::make($request->all(), [
             'fecha_despacho' => 'required|date',
         ]);
@@ -199,12 +198,12 @@ class PedidoController extends Controller
     {
         $pedido = Pedido::findOrFail($id);
 
-        // Validar que el estado actual no sea superior
+        // Valida que el estado actual no sea superior
         if ($this->estadoJerarquia[$pedido->estado] > $this->estadoJerarquia['recibido']) {
             return response()->json(['error' => 'No se puede cambiar a recibido desde el estado actual.'], 422);
         }
 
-        // Validar la fecha de entrega usando Validator
+        // Validar la fecha de entrega
         $validator = Validator::make($request->all(), [
             'fecha_entrega' => 'required|date',
         ]);
